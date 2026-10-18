@@ -118,7 +118,7 @@ function SiteFooter({ packMode }: { packMode?: string }) {
       </div>
       <a
         className="footer-github"
-        href="https://github.com/mahmoudelfeelig/SceneChain"
+        href="https://github.com/elephancy/SceneChain"
         target="_blank"
         rel="noreferrer"
         aria-label="Open SceneChain GitHub repository"

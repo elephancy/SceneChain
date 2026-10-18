@@ -13,7 +13,7 @@ materials, and written institutional decisions are complete.
 ## Project links
 
 - Live prototype: <https://scenechain.elfeel.me>
-- Source repository: <https://github.com/mahmoudelfeelig/SceneChain>
+- Source repository: <https://github.com/elephancy/SceneChain>
 - [Frozen protocol](protocol.md)
 - [Study plan and preregistration draft](study-plan.md)
 - [Participant information and consent](participant-materials.md)
