@@ -5,7 +5,7 @@ RUN mvn -q -DskipTests dependency:go-offline
 COPY src src
 RUN mvn -q -DskipTests package
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN apk upgrade --no-cache \
     && addgroup -S scenechain \
     && adduser -S -D -H -u 10001 -G scenechain scenechain
