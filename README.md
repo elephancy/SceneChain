@@ -1,6 +1,6 @@
 # SceneChain
 
-[![SceneChain CI](https://github.com/mahmoudelfeelig/SceneChain/actions/workflows/ci.yml/badge.svg)](https://github.com/mahmoudelfeelig/SceneChain/actions/workflows/ci.yml)
+[![SceneChain CI](https://github.com/elephancy/SceneChain/actions/workflows/ci.yml/badge.svg)](https://github.com/elephancy/SceneChain/actions/workflows/ci.yml)
 
 SceneChain is a research prototype comparing manual password login with a
 five-stage graphical passphrase. Each stage combines a location on a stable
