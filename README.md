@@ -62,11 +62,11 @@ For local production-profile checks, combine `docker-compose.yml` with
 enables secure cookies and separates Flyway's migration role from the runtime
 application role.
 
-Production releases use the repository's minimal OIDC caller after the exact
-`main` CI run succeeds. A restricted release controller owns machine access,
-routing, immutable image promotion, backup, restore, and rollback. This public
-repository intentionally contains no direct-host deployment procedure or
-long-lived deployment credential.
+The private deployment controller discovers the exact `main` commit after all
+required `SceneChain CI` checks succeed. It owns build policy, registry access,
+immutable image promotion, routing, backup, restore, and rollback. This repository
+provides application CI and build inputs; it has no production release workflow,
+registry identity, deployment manifest, or deployment credentials.
 
 Useful verification commands are:
 
