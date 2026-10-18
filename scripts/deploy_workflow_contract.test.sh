@@ -14,7 +14,7 @@ done
 
 # Preserve the complete application CI and container/security verification gates.
 for check in \
-  'name: SceneChain CI' \
+  'name: CI' \
   'mvn --batch-mode verify' \
   'npm run lint' \
   'npm test' \
