@@ -20,7 +20,11 @@ for check in \
   'npm test' \
   'npm run build' \
   'npm audit --audit-level=high' \
-  'docker compose build backend frontend' \
+  'targets: backend,frontend' \
+  'backend.tags=scenechain-backend:latest' \
+  'frontend.tags=scenechain-frontend:latest' \
+  'load: true' \
+  'docker compose up -d --no-build' \
   'severity-cutoff: high' \
   'sh ./scripts/security_negative_test.sh' \
   'sh ./scripts/smoke_test.sh'

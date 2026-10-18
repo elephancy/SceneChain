@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -62,7 +66,19 @@ jobs:
     needs: [backend, frontend, repository]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - run: docker compose build backend frontend
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/bake-action@5be5f02ff8819ecd3092ea6b2e6261c31774f2b4 # v6
+        with:
+          files: docker-compose.yml
+          targets: backend,frontend
+          load: true
+          set: |
+            backend.cache-from=type=gha,scope=scenechain-backend
+            backend.cache-to=type=gha,mode=max,scope=scenechain-backend
+            backend.tags=scenechain-backend:latest
+            frontend.cache-from=type=gha,scope=scenechain-frontend
+            frontend.cache-to=type=gha,mode=max,scope=scenechain-frontend
+            frontend.tags=scenechain-frontend:latest
       - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           image: scenechain-backend:latest
@@ -80,7 +96,20 @@ jobs:
       MANIFEST_SHA256: 99bc78510a377e6b7712cd120a76df844a9cb311616f682aa6046047e5bdfb58
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - run: docker compose up -d --build
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/bake-action@5be5f02ff8819ecd3092ea6b2e6261c31774f2b4 # v6
+        with:
+          files: docker-compose.yml
+          targets: backend,frontend
+          load: true
+          set: |
+            backend.cache-from=type=gha,scope=scenechain-backend
+            backend.cache-to=type=gha,mode=max,scope=scenechain-backend
+            backend.tags=scenechain-backend:latest
+            frontend.cache-from=type=gha,scope=scenechain-frontend
+            frontend.cache-to=type=gha,mode=max,scope=scenechain-frontend
+            frontend.tags=scenechain-frontend:latest
+      - run: docker compose up -d --no-build
       - run: |
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:8088/api/pack/status; then
