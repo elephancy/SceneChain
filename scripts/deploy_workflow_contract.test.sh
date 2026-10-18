@@ -1,29 +1,32 @@
 #!/bin/sh
 set -eu
 
-WORKFLOW=.github/workflows/deploy-hetzner.yml
-EXPECTED_GATEWAY='mahmoudelfeelig/HetznerReleaseGateway/.github/workflows/release.yml'
+# The private controller polls verified main CI; this repository never publishes releases.
+test ! -e .github/workflows/deploy-hetzner.yml
+test ! -e .github/hetzner-release.json
+for workflow in .github/workflows/*.yml
+do
+  if grep -Eiq 'HetznerReleaseGateway|id-token:[[:space:]]*write|HETZNER_|DEPLOY_(HOST|USER|PATH|KEY)|SSH_PRIVATE_KEY|secrets:[[:space:]]*inherit' "$workflow"; then
+    echo "Application CI must not publish production releases or carry deployment credentials." >&2
+    exit 1
+  fi
+done
 
-grep -Fq 'workflow_run:' "$WORKFLOW"
-grep -Fq 'workflows: ["SceneChain CI"]' "$WORKFLOW"
-grep -Fq "github.event.workflow_run.conclusion == 'success'" "$WORKFLOW"
-grep -Fq "github.event.workflow_run.event == 'push'" "$WORKFLOW"
-grep -Fq "github.event.workflow_run.head_branch == 'main'" "$WORKFLOW"
-grep -Fq 'github.event.workflow_run.head_repository.full_name == github.repository' "$WORKFLOW"
-
-grep -Fq 'actions: read' "$WORKFLOW"
-grep -Fq 'contents: read' "$WORKFLOW"
-grep -Fq 'id-token: write' "$WORKFLOW"
-test "$(grep -Ec '^[[:space:]]*uses: .+@[0-9a-f]{40}$' "$WORKFLOW")" -eq 1
-grep -Eq "uses: ${EXPECTED_GATEWAY}@[0-9a-f]{40}$" "$WORKFLOW"
-grep -Fq 'app: scenechain' "$WORKFLOW"
-grep -Fq 'source_sha: ${{ github.event.workflow_run.head_sha }}' "$WORKFLOW"
-grep -Fq 'ci_run_id: ${{ github.event.workflow_run.id }}' "$WORKFLOW"
-
-if grep -Eq '^[[:space:]]+(run|steps):|^[[:space:]]*secrets:|secrets\.' "$WORKFLOW"; then
-  echo "The production caller must not execute host commands or inherit credentials." >&2
-  exit 1
-fi
+# Preserve the complete application CI and container/security verification gates.
+for check in \
+  'name: SceneChain CI' \
+  'mvn --batch-mode verify' \
+  'npm run lint' \
+  'npm test' \
+  'npm run build' \
+  'npm audit --audit-level=high' \
+  'docker compose build backend frontend' \
+  'severity-cutoff: high' \
+  'sh ./scripts/security_negative_test.sh' \
+  'sh ./scripts/smoke_test.sh'
+do
+  grep -Fq "$check" .github/workflows/ci.yml
+done
 
 for retired in \
   deploy/Caddyfile.example \
@@ -38,4 +41,4 @@ do
   fi
 done
 
-echo "Central deployment caller contract passed."
+echo "Private deployment controller boundary passed."
