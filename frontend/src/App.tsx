@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { AlertTriangle, ArrowRight, CheckCheck, Eye, EyeOff, Github, Info, KeyRound, LogOut, MapPin, Navigation, PenLine, ScanLine, ShieldCheck, UserPlus } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CheckCheck, Eye, EyeOff, Info, KeyRound, LogOut, MapPin, Navigation, PenLine, ScanLine, ShieldCheck, UserPlus } from 'lucide-react'
+import { GitHubIcon } from './components/GitHubIcon'
 import { api } from './api/client'
 import { ActionPad } from './components/ActionPad'
 import { SceneBoard } from './components/SceneBoard'
@@ -123,7 +124,7 @@ function SiteFooter({ packMode }: { packMode?: string }) {
         rel="noreferrer"
         aria-label="Open SceneChain GitHub repository"
       >
-        <Github aria-hidden="true" />
+        <GitHubIcon aria-hidden="true" />
       </a>
     </footer>
 }
