@@ -83,10 +83,11 @@ python3 scripts/validate_scene_pack.py scene-pack/v1/manifest.json
 
 The Docker images are runtime images and intentionally omit Maven and Node.js;
 run the source-level commands above locally or rely on the equivalent GitHub
-Actions jobs. The integration workflow additionally starts a fresh Compose
-stack, checks security-negative behavior while recruitment is closed, opens a
-clearly labelled disposable local gate, and completes enrollment and
-authentication before deleting the test volume.
+Actions jobs. Container verification builds each image once, scans the backend,
+and uses those same images in a fresh Compose stack. It checks security-negative
+behavior while recruitment is closed, opens a clearly labelled disposable local
+gate, and completes enrollment and authentication before deleting the test volume.
+The required integration status succeeds only when that entire phase succeeds.
 
 The local-only scene reviewer binds to loopback and edits the staging manifest
 only after explicit operator actions:

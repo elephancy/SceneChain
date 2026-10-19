@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
 
 jobs:
   backend:
@@ -69,36 +69,7 @@ jobs:
 
   containers:
     runs-on: ubuntu-latest
-    needs: [backend, frontend, repository]
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-        with:
-          persist-credentials: false
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/bake-action@5be5f02ff8819ecd3092ea6b2e6261c31774f2b4 # v6
-        with:
-          source: .
-          files: docker-compose.yml
-          targets: backend,frontend
-          load: true
-          set: |
-            backend.cache-from=type=gha,scope=scenechain-backend
-            backend.cache-to=type=gha,mode=max,scope=scenechain-backend
-            backend.tags=scenechain-backend:latest
-            frontend.cache-from=type=gha,scope=scenechain-frontend
-            frontend.cache-to=type=gha,mode=max,scope=scenechain-frontend
-            frontend.tags=scenechain-frontend:latest
-      - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
-        with:
-          image: scenechain-backend:latest
-          fail-build: true
-          severity-cutoff: high
-          only-fixed: true
-          grype-version: v0.112.0
-          output-format: table
-
-  integration:
-    runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [backend, frontend, repository]
     env:
       PROTOCOL_SHA256: 4c8b6fcccad045a4916f72a0116a01da9dfe60b63fde88c0b7b6459c938bd4d6
@@ -121,7 +92,25 @@ jobs:
             frontend.cache-from=type=gha,scope=scenechain-frontend
             frontend.cache-to=type=gha,mode=max,scope=scenechain-frontend
             frontend.tags=scenechain-frontend:latest
+      - name: Record the built image identities
+        run: |
+          backend_image_id=$(docker image inspect --format '{{.Id}}' scenechain-backend:latest)
+          frontend_image_id=$(docker image inspect --format '{{.Id}}' scenechain-frontend:latest)
+          printf 'CI_BUILT_BACKEND_ID=%s\n' "$backend_image_id" >> "$GITHUB_ENV"
+          printf 'CI_BUILT_FRONTEND_ID=%s\n' "$frontend_image_id" >> "$GITHUB_ENV"
+      - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: scenechain-backend:latest
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          grype-version: v0.112.0
+          output-format: table
       - run: docker compose up -d --no-build
+      - name: Verify initial application image identities
+        run: |
+          test "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q backend)")" = "$CI_BUILT_BACKEND_ID"
+          test "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q frontend)")" = "$CI_BUILT_FRONTEND_ID"
       - run: |
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:8088/api/pack/status; then
@@ -136,7 +125,11 @@ jobs:
           docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U scenechain -d scenechain \
             -c "UPDATE release_gate SET protocol_sha256='$PROTOCOL_SHA256', manifest_sha256='$MANIFEST_SHA256', preregistration_id='LOCAL-SMOKE-NOT-AN-APPROVAL', ethics_reference='LOCAL-SMOKE-NOT-AN-APPROVAL', data_protection_reference='LOCAL-SMOKE-NOT-AN-APPROVAL', approved_at=now(), approved_by='LOCAL-SMOKE-NOT-AN-APPROVAL', recruitment_enabled=TRUE WHERE singleton=TRUE;"
           SCENECHAIN_PROTOCOL_SHA256="$PROTOCOL_SHA256" SCENECHAIN_RECRUITMENT_ENABLED=true \
-            docker compose up -d --force-recreate backend frontend
+            docker compose up -d --no-build --force-recreate backend frontend
+      - name: Verify gated application image identities
+        run: |
+          test "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q backend)")" = "$CI_BUILT_BACKEND_ID"
+          test "$(docker inspect --format '{{.Image}}' "$(docker compose ps -q frontend)")" = "$CI_BUILT_FRONTEND_ID"
       - name: Wait for the gated application
         run: |
           for attempt in $(seq 1 30); do
@@ -151,3 +144,14 @@ jobs:
         run: docker compose logs --no-color
       - if: always()
         run: docker compose down -v
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [containers]
+    if: ${{ always() }}
+    steps:
+      - name: Require scanning and integration to succeed
+        env:
+          CONTAINERS_RESULT: ${{ needs.containers.result }}
+        run: test "$CONTAINERS_RESULT" = success

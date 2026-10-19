@@ -32,6 +32,12 @@ do
   grep -Fq "$check" .github/workflows/ci.yml
 done
 
+# Scan and exercise one build, while keeping the required integration status fail-closed.
+test "$(grep -c 'uses: docker/bake-action@' .github/workflows/ci.yml)" -eq 1
+grep -Fq 'needs: [containers]' .github/workflows/ci.yml
+grep -Fq 'run: test "$CONTAINERS_RESULT" = success' .github/workflows/ci.yml
+grep -Fq 'docker compose up -d --no-build --force-recreate backend frontend' .github/workflows/ci.yml
+
 for retired in \
   deploy/Caddyfile.example \
   deploy/Caddyfile.hetzner.example \
