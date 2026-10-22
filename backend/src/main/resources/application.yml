@@ -22,6 +22,7 @@ spring:
     user: ${MIGRATION_DATABASE_USER:${DATABASE_USER:scenechain}}
     password: ${MIGRATION_DATABASE_PASSWORD:${DATABASE_PASSWORD:scenechain_dev}}
   jackson:
+    use-jackson2-defaults: true
     default-property-inclusion: non_null
 scenechain:
   cookie-secure: ${COOKIE_SECURE:false}
