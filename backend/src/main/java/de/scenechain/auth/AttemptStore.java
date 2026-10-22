@@ -1,7 +1,7 @@
 package de.scenechain.auth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import de.scenechain.config.SceneChainProperties;
 import java.time.Duration;
 import java.util.List;
@@ -37,7 +37,7 @@ public class AttemptStore {
     private void put(String key, Object value) {
         try {
             redis.opsForValue().set(key, mapper.writeValueAsString(value), ttl);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -55,7 +55,7 @@ public class AttemptStore {
         if (value == null) return null;
         try {
             return mapper.readValue(value, type);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

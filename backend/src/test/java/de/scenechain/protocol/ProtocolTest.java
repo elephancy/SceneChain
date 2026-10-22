@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HexFormat;
 import java.util.List;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class ProtocolTest {
     @Test
     void encodesPublishedVector() throws Exception {
         byte[] encoded = Protocol.encode(vector);
-        var published = new ObjectMapper().readTree(Path.of("../protocol/test-vectors/credential-v1.json").toFile());
+        var published = JsonMapper.builder().build().readTree(Path.of("../protocol/test-vectors/credential-v1.json").toFile());
         assertThat(encoded).hasSize(39);
         assertThat(HexFormat.of().formatHex(encoded))
             .isEqualTo(published.path("encodedHex").asText());

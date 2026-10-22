@@ -29,7 +29,10 @@ def digest(path: Path) -> str:
 
 
 def sha1(path: Path) -> str:
-    value = hashlib.sha1()
+    # Commons publishes SHA-1 source-record checksums; this preserves that format.
+    # Artifact and manifest integrity use the separate SHA-256 digest() function.
+    # nosemgrep: python.lang.security.insecure-hash-algorithm-sha1
+    value = hashlib.sha1(usedforsecurity=False)
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             value.update(chunk)
