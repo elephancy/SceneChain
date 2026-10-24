@@ -1,11 +1,11 @@
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /work
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.29-alpine
+FROM nginx:1.31-alpine
 RUN sed -i 's@^[[:space:]]*pid[[:space:]].*;@pid /tmp/nginx.pid;@' /etc/nginx/nginx.conf \
     && grep -Fx 'pid /tmp/nginx.pid;' /etc/nginx/nginx.conf >/dev/null \
     && chown -R nginx:nginx /var/cache/nginx /etc/nginx/conf.d /usr/share/nginx/html

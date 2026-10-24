@@ -48,6 +48,16 @@ updates:
       interval: daily
     open-pull-requests-limit: 5
     groups:
+      vitest:
+        patterns:
+          - vitest
+          - '@vitest/*'
+      react:
+        patterns:
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
       compatible-updates:
         patterns:
           - "*"
