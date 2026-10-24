@@ -1,9 +1,8 @@
 package de.scenechain.scene;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import de.scenechain.crypto.CredentialCrypto;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -93,7 +92,7 @@ public class SceneService {
             }
             if (familyCounts.size() != 8 || familyCounts.values().stream().anyMatch(count -> count != 6)) return List.of();
             return List.copyOf(loaded);
-        } catch (IOException | RuntimeException error) {
+        } catch (RuntimeException error) {
             return List.of();
         }
     }
