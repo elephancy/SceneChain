@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import { AlertTriangle, ArrowRight, CheckCheck, Eye, EyeOff, Info, KeyRound, LogOut, MapPin, Navigation, PenLine, ScanLine, ShieldCheck, UserPlus } from 'lucide-react'
 import { GitHubIcon } from './components/GitHubIcon'
 import { api } from './api/client'
@@ -28,11 +28,11 @@ const viewFromPath = (path: string): View => {
 }
 
 const HERO_SCENES = [
-  { asset: '/scenes/2001.webp', label: 'Scene 1' },
-  { asset: '/scenes/2002.webp', label: 'Scene 2' },
-  { asset: '/scenes/2003.webp', label: 'Scene 3' },
-  { asset: '/scenes/2004.webp', label: 'Scene 4' },
-  { asset: '/scenes/2005.webp', label: 'Scene 5' },
+  { asset: '/scene-previews/v1/2001.webp', label: 'Scene 1' },
+  { asset: '/scene-previews/v1/2002.webp', label: 'Scene 2' },
+  { asset: '/scene-previews/v1/2003.webp', label: 'Scene 3' },
+  { asset: '/scene-previews/v1/2004.webp', label: 'Scene 4' },
+  { asset: '/scene-previews/v1/2005.webp', label: 'Scene 5' },
 ]
 
 export function App() {
@@ -89,7 +89,7 @@ export function App() {
       <div className="scene-journey" aria-label="Five scene authentication journey">
         {HERO_SCENES.map((scene, index) => <article className="journey-step" key={scene.asset}>
           <span className="step-number">{index + 1}</span>
-          <img src={scene.asset} alt={`Real-world photograph used as ${scene.label.toLowerCase()}`} />
+          <img src={scene.asset} alt={`Real-world photograph used as ${scene.label.toLowerCase()}`} loading={index === 0 ? 'eager' : 'lazy'} decoding="async" />
           <div><strong>{scene.label}</strong><span>Where are you?</span><span>Which direction?</span></div>
           <ArrowRight className="step-arrow" aria-hidden="true" />
         </article>)}
@@ -108,7 +108,7 @@ export function App() {
 function SiteFooter({ packMode }: { packMode?: string }) {
   return <footer className="landing-footer">
       <a className="footer-brand" href="https://elfeel.me" target="_blank" rel="noreferrer" aria-label="Open elfeel.me">
-        <img className="footer-elephant" src="/assets/brand/elephant-logo.png" alt="" />
+        <img className="footer-elephant" src="/assets/brand/elephant-logo.ico" alt="" />
       </a>
       <div className="footer-copy">
         <span>© Mahmoud elfeel 2026</span>
@@ -156,7 +156,7 @@ function HowItWorks({ go, recruitmentEnabled, packMode }: { go: (view: View) => 
       <article className="how-step">
         <div className="how-demo demo-chain">
           {[2002, 2004, 2005].map((scene, index) => <span key={scene}>
-            <img src={`/scenes/${scene}.webp`} alt={`Real-world example for route scene ${index + 3}`} />
+            <img src={`/scene-previews/v1/${scene}.webp`} alt={`Real-world example for route scene ${index + 3}`} loading="lazy" />
             <i>{index + 3}</i>
           </span>)}
           <CheckCheck aria-hidden="true" />
@@ -173,13 +173,18 @@ function HowItWorks({ go, recruitmentEnabled, packMode }: { go: (view: View) => 
 }
 
 function SiteHeader({ current, go, recruitmentEnabled }: { current: View; go: (view: View) => void; recruitmentEnabled?: boolean }) {
+  const follow = (event: MouseEvent<HTMLAnchorElement>, next: View) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    go(next)
+  }
   return <header className="site-header">
     <button className="brand brand-button" onClick={() => go('home')} aria-label="SceneChain home"><span className="brand-mark"><ScanLine size={23} /></span><span>SceneChain</span></button>
     <nav aria-label="Primary navigation">
-      <button className={current === 'home' ? 'active' : ''} onClick={() => go('home')}>Overview</button>
-      <button className={current === 'how' ? 'active' : ''} onClick={() => go('how')}>How it works</button>
-      <button className={current === 'practice' ? 'active' : ''} onClick={() => go('practice')}>Practice</button>
-      <button className={current === 'privacy' ? 'active' : ''} onClick={() => go('privacy')}>Privacy</button>
+      <a href={PATHS.home} className={current === 'home' ? 'active' : ''} aria-current={current === 'home' ? 'page' : undefined} onClick={event => follow(event, 'home')}>Overview</a>
+      <a href={PATHS.how} className={current === 'how' ? 'active' : ''} aria-current={current === 'how' ? 'page' : undefined} onClick={event => follow(event, 'how')}>How it works</a>
+      <a href={PATHS.practice} className={current === 'practice' ? 'active' : ''} aria-current={current === 'practice' ? 'page' : undefined} onClick={event => follow(event, 'practice')}>Practice</a>
+      <a href={PATHS.privacy} className={current === 'privacy' ? 'active' : ''} aria-current={current === 'privacy' ? 'page' : undefined} onClick={event => follow(event, 'privacy')}>Privacy</a>
     </nav>
     <div className="header-actions"><button className="secondary" onClick={() => go('login')}>Sign in</button><button className="primary" disabled={!recruitmentEnabled} onClick={() => go('consent')}>Join study <ArrowRight size={18} /></button></div>
   </header>
