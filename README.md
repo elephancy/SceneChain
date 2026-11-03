@@ -6,6 +6,8 @@ SceneChain is a research prototype comparing manual password login with a
 five-stage graphical passphrase. Each stage combines a location on a stable
 full-scene image with a discrete directional action.
 
+Explore the public practice experience at [scenechain.elfeel.me](https://scenechain.elfeel.me/).
+
 The experiment has three conditions:
 
 - a manual password baseline;
