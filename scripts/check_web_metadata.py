@@ -1,8 +1,8 @@
 """Check initial SceneChain route metadata through its web server."""
 import sys
 from html.parser import HTMLParser
-from urllib.error import HTTPError
-from urllib.request import urlopen
+from http.client import HTTPConnection
+from urllib.parse import urlsplit
 
 
 class Head(HTMLParser):
@@ -31,16 +31,25 @@ class Head(HTMLParser):
             self.title += data
 
 
-base = sys.argv[1].rstrip('/')
+target = urlsplit(sys.argv[1])
+if target.scheme != 'http' or target.hostname not in {'localhost', '127.0.0.1'} or target.path not in {'', '/'}:
+    raise ValueError('Expected an isolated local HTTP server')
+
+def get(path):
+    connection = HTTPConnection(target.hostname, target.port, timeout=10)
+    connection.request('GET', path)
+    response = connection.getresponse()
+    # Reading the body closes this short-lived HTTP/1.0 connection.
+    return response
 for path, title, canonical in [
-    ('/', 'SceneChain — Graphical Password Research Prototype', '/'),
+    ('/', 'SceneChain â€” Graphical Password Research Prototype', '/'),
     ('/how-it-works', 'How SceneChain Works | Graphical Password Research', '/how-it-works'),
     ('/how-it-works/', 'How SceneChain Works | Graphical Password Research', '/how-it-works'),
     ('/sign-in', 'SceneChain | Practice and Research Workspace', None),
     ('/research/session', 'SceneChain | Practice and Research Workspace', None),
     ('/practice', 'SceneChain | Practice and Research Workspace', None),
 ]:
-    with urlopen(base + path, timeout=10) as response:
+    with get(path) as response:
         head = Head()
         head.feed(response.read().decode('utf-8'))
         assert head.title == title, (path, head.title)
@@ -48,10 +57,6 @@ for path, title, canonical in [
         assert head.robots == ['index,follow' if canonical else 'noindex,follow'], path
         assert response.headers.get('Content-Security-Policy'), path
 for path in ['/__seo', '/__seo/how.html']:
-    try:
-        response = urlopen(base + path, timeout=10)
-    except HTTPError as error:
-        response = error
-    with response:
+    with get(path) as response:
         assert response.status == 404, path
 print('SceneChain initial route metadata verified')
