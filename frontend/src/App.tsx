@@ -37,17 +37,18 @@ const HERO_SCENES = [
 ]
 
 export function App() {
-  const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname))
+  const [path, setPath] = useState(() => window.location.pathname)
+  const view = viewFromPath(path)
   const [handle, setHandle] = useState('')
   const [mode, setMode] = useState<Mode>('direct')
   const [me, setMe] = useState<string | null>(null)
   const [pack, setPack] = useState<{ mode: string; sceneCount: number; recruitmentEnabled: boolean } | null>(null)
   const [privacyReturn, setPrivacyReturn] = useState<View>('home')
 
-  useEffect(() => { updatePageMetadata(window.location.pathname) }, [view])
+  useEffect(() => { updatePageMetadata(path) }, [path])
 
   useEffect(() => {
-    const syncRoute = () => setView(viewFromPath(window.location.pathname))
+    const syncRoute = () => setPath(window.location.pathname)
     window.addEventListener('popstate', syncRoute)
     return () => window.removeEventListener('popstate', syncRoute)
   }, [])
@@ -56,14 +57,14 @@ export function App() {
     if (['/', '/sign-in', '/sign-in/password'].includes(window.location.pathname)) {
       const next = r.studyRequired ? 'study' : 'workspace'
       window.history.replaceState({}, '', PATHS[next])
-      setView(next)
+      setPath(PATHS[next])
     }
   }).catch(() => undefined) }, [])
   useEffect(() => { api.get<{ mode: string; sceneCount: number; recruitmentEnabled: boolean }>('/api/pack/status').then(setPack).catch(() => undefined) }, [])
 
   const go = (next: View, replace = false) => {
     window.history[replace ? 'replaceState' : 'pushState']({}, '', PATHS[next])
-    setView(next)
+    setPath(PATHS[next])
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
   if (view === 'how') return <HowItWorks go={go} recruitmentEnabled={pack?.recruitmentEnabled} packMode={pack?.mode} />
