@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 're
 import { AlertTriangle, ArrowRight, CheckCheck, Eye, EyeOff, Info, KeyRound, LogOut, MapPin, Navigation, PenLine, ScanLine, ShieldCheck, UserPlus } from 'lucide-react'
 import { GitHubIcon } from './components/GitHubIcon'
 import { api } from './api/client'
+import { updatePageMetadata } from './lib/pageMetadata'
 import { ActionPad } from './components/ActionPad'
 import { SceneBoard } from './components/SceneBoard'
 import type { AttemptResponse, EnrollmentResponse, Mode, Stage } from './types'
@@ -42,6 +43,8 @@ export function App() {
   const [me, setMe] = useState<string | null>(null)
   const [pack, setPack] = useState<{ mode: string; sceneCount: number; recruitmentEnabled: boolean } | null>(null)
   const [privacyReturn, setPrivacyReturn] = useState<View>('home')
+
+  useEffect(() => { updatePageMetadata(window.location.pathname) }, [view])
 
   useEffect(() => {
     const syncRoute = () => setView(viewFromPath(window.location.pathname))
