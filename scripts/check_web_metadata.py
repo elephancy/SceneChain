@@ -42,7 +42,7 @@ def get(path):
     # Reading the body closes this short-lived HTTP/1.0 connection.
     return response
 for path, title, canonical in [
-    ('/', 'SceneChain â€” Graphical Password Research Prototype', '/'),
+    ('/', 'SceneChain \u2014 Graphical Password Research Prototype', '/'),
     ('/how-it-works', 'How SceneChain Works | Graphical Password Research', '/how-it-works'),
     ('/how-it-works/', 'How SceneChain Works | Graphical Password Research', '/how-it-works'),
     ('/sign-in', 'SceneChain | Practice and Research Workspace', None),
