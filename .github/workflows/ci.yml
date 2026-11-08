@@ -141,6 +141,7 @@ jobs:
             sleep 2
           done
           exit 1
+      - run: python3 scripts/check_web_metadata.py http://localhost:8088
       - run: sh ./scripts/security_negative_test.sh
       - name: Open a disposable local-only release gate
         run: |

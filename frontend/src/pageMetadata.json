@@ -1,0 +1,10 @@
+{
+  "/": {
+    "title": "SceneChain — Graphical Password Research Prototype",
+    "description": "Explore SceneChain, a research prototype comparing passwords with a five-stage graphical passphrase."
+  },
+  "/how-it-works": {
+    "title": "How SceneChain Works | Graphical Password Research",
+    "description": "Learn how SceneChain combines five scenes, remembered locations and directions in a graphical authentication research prototype."
+  }
+}
