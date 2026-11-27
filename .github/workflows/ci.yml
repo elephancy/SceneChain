@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: "21"
@@ -120,7 +120,7 @@ jobs:
           frontend_image_id=$(docker image inspect --format '{{.Id}}' scenechain-frontend:latest)
           printf 'CI_BUILT_BACKEND_ID=%s\n' "$backend_image_id" >> "$GITHUB_ENV"
           printf 'CI_BUILT_FRONTEND_ID=%s\n' "$frontend_image_id" >> "$GITHUB_ENV"
-      - uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+      - uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
         with:
           image: scenechain-backend:latest
           fail-build: true
